@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Todo List</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body class="min-h-screen bg-slate-100 text-slate-900">
+  <div aria-hidden="true" class="hidden bg-gradient-to-r from-red-200 via-red-50 to-white border-red-300 bg-gradient-to-r from-amber-200 via-amber-50 to-white border-amber-300 bg-gradient-to-r from-green-200 via-green-50 to-white border-green-300 bg-gradient-to-r from-slate-50 to-white border-slate-200"></div>
+  <main class="mx-auto max-w-3xl px-4 py-10 sm:px-6">
+    <header class="mb-8">
+      <p class="text-sm font-semibold uppercase tracking-widest text-indigo-600">Stay on track</p>
+      <h1 class="mt-2 text-4xl font-bold tracking-tight">Todo List</h1>
+      <p class="mt-2 text-slate-600">Capture the task, set a deadline, and keep moving.</p>
+    </header>
+
+    <section>
+      <div class="mb-4 flex items-center justify-between">
+        <h2 class="text-xl font-semibold">Your tasks</h2>
+        <div class="flex items-center gap-3">
+          <span data-task-count class="text-sm text-slate-500">{{ tasks|length }} total</span>
+          <button type="button" data-open-task-dialog
+                  class="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+            + Add
+          </button>
+        </div>
+      </div>
+
+        <ul data-task-list class="space-y-3" {% if not tasks %}hidden{% endif %}>
+          {% for task in tasks %}
+            {% include "_task_card.html" %}
+          {% endfor %}
+        </ul>
+        <div data-empty-state class="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center" {% if tasks %}hidden{% endif %}>
+          <p class="text-lg font-semibold text-slate-800">Nothing on your list yet</p>
+          <p class="mt-1 text-sm text-slate-500">Add a task above to get started.</p>
+        </div>
+    </section>
+  </main>
+
+  <dialog id="add-task-dialog" aria-labelledby="add-task-title"
+          class="m-auto w-[calc(100%-2rem)] max-w-xl rounded-2xl bg-white p-0 text-slate-900 shadow-2xl backdrop:bg-slate-950/50">
+    <div class="flex items-start justify-between border-b border-slate-200 px-5 py-4 sm:px-6">
+      <div>
+        <p class="text-sm font-semibold uppercase tracking-widest text-indigo-600">Stay on track</p>
+        <h2 id="add-task-title" class="mt-1 text-xl font-bold">Add a task</h2>
+      </div>
+      <button type="button" data-close-task-dialog aria-label="Close dialog"
+              class="rounded-lg p-2 text-2xl leading-none text-slate-500 hover:bg-slate-100 hover:text-slate-800">&times;</button>
+    </div>
+    <form method="post" action="{{ url_for('add_task') }}" class="space-y-4 p-5 sm:p-6 deadline-form" data-add-task-form>
+      <div>
+        <label for="add-title" class="mb-1 block text-sm font-medium text-slate-700">Task</label>
+        <input id="add-title" name="title" maxlength="200" required
+               class="w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200">
+      </div>
+      <div>
+        <label for="add-description" class="mb-1 block text-sm font-medium text-slate-700">Description <span class="font-normal text-slate-500">(optional)</span></label>
+        <textarea id="add-description" name="description" maxlength="2000" rows="3"
+                  class="w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"></textarea>
+      </div>
+      <div>
+        <label for="add-due-at" class="mb-1 block text-sm font-medium text-slate-700">Due date and time <span class="font-normal text-slate-500">(your local time)</span></label>
+        <input id="add-due-at" name="due_at" type="datetime-local" step="60" required
+               class="w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200">
+        <input type="hidden" name="timezone_offset_minutes">
+        <p data-past-warning role="status" aria-live="polite" hidden
+           class="mt-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+          This deadline is in the past. You can still save the task with this deadline.
+        </p>
+      </div>
+      <div class="flex justify-end gap-3 pt-2">
+        <button type="button" data-close-task-dialog
+                class="rounded-lg border border-slate-300 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50">Cancel</button>
+        <button type="submit"
+                class="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+          Add task
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="edit-task-dialog" aria-labelledby="edit-task-title"
+          class="m-auto w-[calc(100%-2rem)] max-w-xl rounded-2xl bg-white p-0 text-slate-900 shadow-2xl backdrop:bg-slate-950/50">
+    <div class="flex items-start justify-between border-b border-slate-200 px-5 py-4 sm:px-6">
+      <div>
+        <p class="text-sm font-semibold uppercase tracking-widest text-indigo-600">Task details</p>
+        <h2 id="edit-task-title" class="mt-1 text-xl font-bold">Edit task</h2>
+      </div>
+      <button type="button" data-close-task-dialog aria-label="Close dialog"
+              class="rounded-lg p-2 text-2xl leading-none text-slate-500 hover:bg-slate-100 hover:text-slate-800">&times;</button>
+    </div>
+    <form method="post" class="space-y-4 p-5 sm:p-6 deadline-form" data-edit-task-form>
+      <div>
+        <label for="edit-title" class="mb-1 block text-sm font-medium text-slate-700">Task</label>
+        <input id="edit-title" name="title" maxlength="200" required
+               class="w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200">
+      </div>
+      <div>
+        <label for="edit-description" class="mb-1 block text-sm font-medium text-slate-700">Description <span class="font-normal text-slate-500">(optional)</span></label>
+        <textarea id="edit-description" name="description" maxlength="2000" rows="3"
+                  class="w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"></textarea>
+      </div>
+      <div>
+        <label for="edit-due-at" class="mb-1 block text-sm font-medium text-slate-700">Due date and time <span class="font-normal text-slate-500">(your local time)</span></label>
+        <input id="edit-due-at" name="due_at" type="datetime-local" step="60" required
+               class="w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200">
+        <input type="hidden" name="timezone_offset_minutes">
+        <p data-past-warning role="status" aria-live="polite" hidden
+           class="mt-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+          This deadline is in the past. You can still save the task with this deadline.
+        </p>
+      </div>
+      <div class="flex justify-end gap-3 pt-2">
+        <button type="button" data-close-task-dialog
+                class="rounded-lg border border-slate-300 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50">Cancel</button>
+        <button type="submit"
+                class="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+          Save changes
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="{{ url_for('static', filename='js/task-deadlines.js') }}" defer></script>
+</body>
+</html>

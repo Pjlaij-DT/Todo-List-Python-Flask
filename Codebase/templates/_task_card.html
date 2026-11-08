@@ -1,0 +1,38 @@
+<li data-task-card data-task-id="{{ task.id }}"
+    data-due-at="{{ task.due_at.isoformat() if task.due_at else '' }}"
+    class="rounded-xl border p-4 shadow-sm transition {{ 'bg-slate-100 border-slate-300' if task.completed else deadline_color(task.due_at, now) }}">
+  <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+    <div class="min-w-0 flex-1">
+      <h3 data-task-title class="break-words text-lg font-semibold {{ 'text-slate-500 line-through' if task.completed else 'text-slate-900' }}">
+        {{ task.title }}
+      </h3>
+      <p data-task-description class="mt-1 whitespace-pre-wrap break-words text-sm text-slate-700" {% if not task.description %}hidden{% endif %}>{{ task.description }}</p>
+      {% if task.completed %}
+        <p data-task-status class="mt-3 text-sm font-medium text-slate-600">Completed</p>
+      {% elif task.due_at %}
+        <p data-task-status class="mt-3 text-sm text-slate-700">
+          Due <time datetime="{{ task.due_at.isoformat() }}" data-local-time>{{ task.due_at.strftime("%Y-%m-%d %H:%M") }} UTC</time>
+          <span class="mx-1 text-slate-400">·</span>
+          <span class="font-semibold" data-countdown data-due-at="{{ task.due_at.isoformat() }}">Calculating time left…</span>
+        </p>
+      {% else %}
+        <p data-task-status class="mt-3 text-sm text-slate-600">No deadline set</p>
+      {% endif %}
+    </div>
+
+    <div class="flex shrink-0 flex-wrap items-center gap-2">
+      <form method="post" action="{{ url_for('toggle_complete', task_id=task.id) }}">
+        <button type="submit" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+          {{ 'Reopen' if task.completed else 'Complete' }}
+        </button>
+      </form>
+      <button type="button" data-edit-task data-edit-url="{{ url_for('edit_task', task_id=task.id) }}"
+              class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Edit</button>
+      <form method="post" action="{{ url_for('delete_task', task_id=task.id) }}" data-delete-task>
+        <button type="submit" class="rounded-lg border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50">
+          Delete
+        </button>
+      </form>
+    </div>
+  </div>
+</li>

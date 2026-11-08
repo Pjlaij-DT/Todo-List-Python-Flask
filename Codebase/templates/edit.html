@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Edit task</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body class="min-h-screen bg-slate-100 text-slate-900">
+  <main class="mx-auto max-w-2xl px-4 py-10 sm:px-6">
+    <a href="{{ url_for('index') }}" class="text-sm font-medium text-indigo-700 hover:text-indigo-900">&larr; Back to tasks</a>
+    <section class="mt-5 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 sm:p-8">
+      <p class="text-sm font-semibold uppercase tracking-widest text-indigo-600">Task details</p>
+      <h1 class="mt-2 text-3xl font-bold tracking-tight">Edit task</h1>
+
+      <form method="post" action="{{ url_for('edit_task', task_id=task.id) }}" class="mt-6 space-y-4 deadline-form">
+        <div>
+          <label for="title" class="mb-1 block text-sm font-medium text-slate-700">Task</label>
+          <input id="title" name="title" value="{{ task.title }}" maxlength="200" required
+                 class="w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200">
+        </div>
+        <div>
+          <label for="description" class="mb-1 block text-sm font-medium text-slate-700">Description <span class="font-normal text-slate-500">(optional)</span></label>
+          <textarea id="description" name="description" maxlength="2000" rows="5"
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200">{{ task.description }}</textarea>
+        </div>
+        <div>
+          <label for="due_at" class="mb-1 block text-sm font-medium text-slate-700">Due date and time <span class="font-normal text-slate-500">(your local time)</span></label>
+          <input id="due_at" name="due_at" type="datetime-local" value="{{ due_at_input_value(task.due_at) }}"
+                 data-utc-value="{{ task.due_at.isoformat() }}" step="60" required
+                 class="w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200">
+          <input type="hidden" name="timezone_offset_minutes">
+          <p data-past-warning role="status" aria-live="polite" hidden
+             class="mt-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+            This deadline is in the past. You can still save the task with this deadline.
+          </p>
+        </div>
+        <div class="flex flex-wrap gap-3 pt-2">
+          <button type="submit" class="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+            Save changes
+          </button>
+          <a href="{{ url_for('index') }}" class="rounded-lg border border-slate-300 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50">Cancel</a>
+        </div>
+      </form>
+    </section>
+  </main>
+  <script src="{{ url_for('static', filename='js/task-deadlines.js') }}" defer></script>
+</body>
+</html>
